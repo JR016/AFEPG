@@ -18,10 +18,8 @@
 
 #IMPORTS
 
-import os
-import tkinter
+import os, tkinter, shutil, copy
 from tkinter import messagebox
-import shutil
 
 #COMMONLY USED FUNCTIONS
 
@@ -49,18 +47,51 @@ def show_info(title, info_message):
     messagebox.showinfo(title, info_message)
     box.destroy()
 
-def writelines_infile(filename,lines,mode):
+def writelines_infile(filename,lines):
     """Writelines in the specific file"""
 
-    with open(filename,mode) as file:
+    with open(filename,"w") as file:
         file.writelines(lines)
-
-
 
 #THE FILE MANAGER CLASS THAT MAKES EVERYTHING WORK
         
 class FileManager(object):
     """Creates a Folder and Files within it and Autofills those Files."""
+
+    #Dictionary that defines file and it's autocontent
+
+    FILE_N_CONTENT = {
+        "html" : [
+            "<!DOCTYPE html> \n\n",
+             "<html> \n\n",
+             "    <head> \n\n",
+             "        <meta charset=\"UTF-8\"> \n\n",
+             "        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n\n",
+             "        <title>Default Title</title> \n\n",
+             "    </head> \n\n",
+             "    <body> \n",
+             "    </body> \n\n",
+             "</html>"
+            ],
+        
+        "css"  : [
+            "             /*Base Styling*/ \n\n\n\n",
+            "* \n",
+            "{ \n",
+            "    -webkit-box-sizing:border-box; \n",
+            "    -moz-box-sizing:border-box; \n",
+            "    box-sizing:border-box; \n",
+            "} \n\n\n\n",
+            "             /*Mobile Devices Styling*/ \n\n\n\n",
+            "@media screen and (min-width: 320px) and (max-width: 479px) \n",
+            "{} \n\n\n\n",
+            "             /*Tablet Devices Styling*/ \n\n\n\n",
+            "@media screen and (min-width: 480px) and (max-width: 959px) \n",
+            "{} \n\n\n\n",
+            "             /*Desktop Devices Styling*/ \n\n\n\n",
+            "@media screen and (min-width: 960px) \n",
+            "{}"]
+        }
 
     def __init__(self, folder_name, folder_path,
                  files_to_create, files_to_autofill, js_position):
@@ -91,7 +122,7 @@ class FileManager(object):
                 self.autofill_files()
 
         #If there was an error creating files or autofilling them, delete everything.
-        if not self.files_created or not self.autofilled:
+        if not self.folder_created or not self.files_created or not self.autofilled:
             self.destroy_all()
 
         else:
@@ -119,7 +150,7 @@ class FileManager(object):
         try:
 
             if self.created_files["html"]:
-                open(self.common_filenames + ".htm","x").close()
+                open(self.common_filenames + ".html","x").close()
 
             if self.created_files["css"]:
                 open(self.common_filenames + ".css","x").close()
@@ -134,8 +165,7 @@ class FileManager(object):
     def autofill_files(self):
         """Autofill selected files by the user."""
 
-        #File Names
-        self.html_filename = self.folder_name + ".htm"
+        #File Names for references
         self.css_filename = self.folder_name + ".css" 
         self.js_filename = self.folder_name + ".js"
 
@@ -143,204 +173,82 @@ class FileManager(object):
         self.html_autocontent = None
         self.css_autocontent = None
 
-        #Check if user wants to autofill the html file (Do some error handling)
         try:
+           
+            #Css is autofilled
+            if self.autofilled_files["css"]:
+                writelines_infile(self.common_filenames + ".css",
+                                  FileManager.FILE_N_CONTENT["css"])
 
-            #Create a list that sequences all possible outcomes
-            self.outcomes = [
-                self.autofilled_files["html"],
-                self.autofilled_files["css"],
-                self.created_files["js"],
-                self.js_position
-                ]
+            #If Html is autofilled
+            if self.autofilled_files["html"]: #Autofill HTML
+                        
+                #Dictionary for css and js references to use in html files
 
-            #All options to autofill HTML files
-            if self.outcomes[0] and self.outcomes[1] and self.outcomes[2] and self.js_position == "head":
-                #This option autofills HTML, CSS, JS is created and it puts it in the head
+                references = {
+                    "css_reference" : f"        <link rel=\"stylesheet\" href=\"{self.css_filename}\"> <!--CSS Reference--> \n\n",
+                    "js_reference"  : f"        <script src=\"{self.js_filename}\"></script> <!--JS Reference--> \n"
+                    }
 
-                self.html_autocontent = ["<!DOCTYPE html> \n\n",
-                                "<html> \n\n",
-                                "    <head> \n\n"
-                                "        <meta charset=\"UTF-8\"> \n\n",
-                                "        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <!--For Responsive Behaviour--> \n\n",
-                                "        <title>Default Title</title> \n\n",
-                                f"       <link rel=\"stylesheet\" href=\"{self.css_filename}\"> <!--CSS File Reference--> \n",
-                                f"       <script src=\"{self.js_filename}\"></script> <!--JS File Reference--> \n\n",
-                                "    </head> \n\n",
-                                "    <body> \n",
-                                "    </body> \n\n",
-                                "</html>"]
+                #Deep copy of the html content
+                html_copy_content = copy.deepcopy(FileManager.FILE_N_CONTENT["html"])
 
-                self.css_autocontent = ["/*Base Styling*/\n\n",
-                                        "* \n",
-                                        "{ \n",
-                                        "    box-sizing: border-box; \n",
-                                        "} \n\n\n\n",
-                                        "/*Mobile Devices Styling*/\n\n",
-                                        "@media (min-width: 320px) and (max-width: 479px) \n",
-                                        "{} \n\n\n\n",
-                                        "/*Tablet Devices Styling*/\n\n",
-                                        "@media (min-width: 480px) and (max-width: 959px) \n",
-                                        "{} \n\n\n\n",
-                                        "/*Desktop Devices Styling*/\n\n",
-                                        "@media (min-width: 960px) \n",
-                                        "{}"]
+                #Indexes of key elements of html content used to attach dynamic content
+                title_index = html_copy_content.index(html_copy_content[5]) #Values is 5
+                body_index = html_copy_content.index(html_copy_content[7]) #Value is 7
 
-                #Write content in files
-                writelines_infile(self.common_filenames + ".htm",self.html_autocontent,"w")
-                writelines_infile(self.common_filenames + ".css", self.css_autocontent,"w")
 
-            elif self.outcomes[0] and self.outcomes[1] and self.outcomes[2] and self.js_position == "body":
-                #This option autofills HTML, CSS,JS is created and it puts it in the body
+                if self.created_files["css"]: #Autofill HTML and CSS
 
-                self.html_autocontent = ["<!DOCTYPE html> \n\n",
-                                "<html> \n\n",
-                                "    <head> \n\n"
-                                "        <meta charset=\"UTF-8\"> \n\n",
-                                "        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <!--For Responsive Behaviour--> \n\n",
-                                "        <title>Default Title</title> \n\n",
-                                f"       <link rel=\"stylesheet\" href=\"{self.css_filename}\"> <!--CSS File Reference--> \n\n",
-                                "    </head> \n\n",
-                                "    <body> \n",
-                                f"       <script src=\"{self.js_filename}\"></script> <!--JS File Reference--> \n",
-                                "    </body> \n\n",
-                                "</html>"]
+                    #Add CSS Reference to HTML autocontent copy
+                    html_copy_content.insert(title_index + 1, references["css_reference"])
 
-                self.css_autocontent = ["/*Base Styling*/\n\n",
-                                        "* \n",
-                                        "{ \n",
-                                        "    box-sizing: border-box; \n",
-                                        "} \n\n\n\n",
-                                        "/*Mobile Devices Styling*/\n\n",
-                                        "@media (min-width: 320px) and (max-width: 479px) \n",
-                                        "{} \n\n\n\n",
-                                        "/*Tablet Devices Styling*/\n\n",
-                                        "@media (min-width: 480px) and (max-width: 959px) \n",
-                                        "{} \n\n\n\n",
-                                        "/*Desktop Devices Styling*/\n\n",
-                                        "@media (min-width: 960px) \n",
-                                        "{}"]
+                    if self.created_files["js"]: #Autofill HTML, CSS and include JS
 
-                #Write content in files
-                writelines_infile(self.common_filenames + ".htm",self.html_autocontent,"w")
-                writelines_infile(self.common_filenames + ".css", self.css_autocontent,"w")
+                        if self.js_position == "head": #Include JS in head
 
-            elif self.outcomes[0] and self.outcomes[1] and not self.outcomes[2]:
-                #This option autofills HTML, CSS and JS is not created
+                            #Add JS Reference to HTML autocontent copy in the head
+                            html_copy_content.insert(title_index + 2, references["js_reference"] + "\n")
 
-                self.html_autocontent = ["<!DOCTYPE html> \n\n",
-                                "<html> \n\n",
-                                "    <head> \n\n"
-                                "        <meta charset=\"UTF-8\"> \n\n",
-                                "        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <!--For Responsive Behaviour--> \n\n",
-                                "        <title>Default Title</title> \n\n",
-                                f"       <link rel=\"stylesheet\" href=\"{self.css_filename}\"> <!--CSS File Reference--> \n\n",
-                                "    </head> \n\n",
-                                "    <body> \n",
-                                "    </body> \n\n",
-                                "</html>"]
+                            #Autofill HTML file
+                            writelines_infile(self.common_filenames + ".html",
+                                              html_copy_content)
 
-                self.css_autocontent = ["/*Base Styling*/\n\n",
-                                        "* \n",
-                                        "{ \n",
-                                        "    box-sizing: border-box; \n",
-                                        "} \n\n\n\n",
-                                        "/*Mobile Devices Styling*/\n\n",
-                                        "@media (min-width: 320px) and (max-width: 479px) \n",
-                                        "{} \n\n\n\n",
-                                        "/*Tablet Devices Styling*/\n\n",
-                                        "@media (min-width: 480px) and (max-width: 959px) \n",
-                                        "{} \n\n\n\n",
-                                        "/*Desktop Devices Styling*/\n\n",
-                                        "@media (min-width: 960px) \n",
-                                        "{}"]
+                        else: #Include JS in body
 
-                #Write content in files
-                writelines_infile(self.common_filenames + ".htm",self.html_autocontent,"w")
-                writelines_infile(self.common_filenames + ".css", self.css_autocontent,"w")
+                            #Add JS Reference to HTML autocontent copy in the body
+                            html_copy_content.insert(body_index + 2, references["js_reference"])
 
-            elif self.outcomes[0] and not self.outcomes[1] and self.outcomes[2] and self.js_position == "head":
-                #This option autofills HTML, not CSS and JS is created and referenced in the head.
+                            #Autofill HTML file
+                            writelines_infile(self.common_filenames + ".html",
+                                              html_copy_content)
 
-                self.html_autocontent = ["<!DOCTYPE html> \n\n",
-                                "<html> \n\n",
-                                "    <head> \n\n"
-                                "        <meta charset=\"UTF-8\"> \n\n",
-                                "        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <!--For Responsive Behaviour--> \n\n",
-                                "        <title>Default Title</title> \n\n",
-                                f"       <script src=\"{self.js_filename}\"></script> <!--JS File Reference--> \n\n",
-                                "    </head> \n\n",
-                                "    <body> \n",
-                                "    </body> \n\n",
-                                "</html>"]
+                    else: #Just write the CSS Reference in HTML File
 
-                #Write content in files
-                writelines_infile(self.common_filenames + ".htm",self.html_autocontent,"w")
+                            writelines_infile(self.common_filenames + ".html",
+                                              html_copy_content)
 
-            elif self.outcomes[0] and not self.outcomes[1] and self.outcomes[2] and self.js_position == "body":
-                #This option autofills HTML, not CSS and JS is created and referenced in the body
+                else: #Autofill HTML but not CSS
 
-                self.html_autocontent = ["<!DOCTYPE html> \n\n",
-                                "<html> \n\n",
-                                "    <head> \n\n"
-                                "        <meta charset=\"UTF-8\"> \n\n",
-                                "        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <!--For Responsive Behaviour--> \n\n",
-                                "        <title>Default Title</title> \n\n",
-                                "    </head> \n\n",
-                                "    <body> \n",
-                                f"       <script src=\"{self.js_filename}\"></script> <!--JS File Reference--> \n",
-                                "    </body> \n\n",
-                                "</html>"]
+                    if self.created_files["js"]: #Autofill HTML and include JS
 
-                #Write content in files
-                writelines_infile(self.common_filenames + ".htm",self.html_autocontent,"w")
+                        if self.js_position == "head": #Include JS in head
+                            html_copy_content.insert(title_index + 1, references["js_reference"] + "\n")
 
-            elif self.outcomes[0] and not self.outcomes[1] and not self.outcomes[2]:
-                #This option autofills HTML, but not CSS neither creates JS
+                            #Autofill HTML file
+                            writelines_infile(self.common_filenames + ".html",
+                                              html_copy_content)
 
-                self.html_autocontent = ["<!DOCTYPE html> \n\n",
-                                "<html> \n\n",
-                                "    <head> \n\n"
-                                "        <meta charset=\"UTF-8\"> \n\n",
-                                "        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> <!--For Responsive Behaviour--> \n\n",
-                                "        <title>Default Title</title> \n\n",
-                                "    </head> \n\n",
-                                "    <body> \n",
-                                "    </body> \n\n",
-                                "</html>"]
+                        else: #Include JS in body
+                            html_copy_content.insert(body_index + 1, references["js_reference"])
 
-                #Write content in files
-                writelines_infile(self.common_filenames + ".htm",self.html_autocontent,"w")
+                            #Autofill HTML file
+                            writelines_infile(self.common_filenames + ".html",
+                                              html_copy_content)
 
-            elif not self.outcomes[0] and self.outcomes[1]:
-                #This option does not autofills HTML, but it autofills CSS
-
-                self.css_autocontent = ["/*Base Styling*/\n\n",
-                                        "* \n",
-                                        "{ \n",
-                                        "    box-sizing: border-box; \n",
-                                        "} \n\n\n\n",
-                                        "/*Mobile Devices Styling*/\n\n",
-                                        "@media (min-width: 320px) and (max-width: 479px) \n",
-                                        "{} \n\n\n\n",
-                                        "/*Tablet Devices Styling*/\n\n",
-                                        "@media (min-width: 480px) and (max-width: 959px) \n",
-                                        "{} \n\n\n\n",
-                                        "/*Desktop Devices Styling*/\n\n",
-                                        "@media (min-width: 960px) \n",
-                                        "{}"]
-
-                writelines_infile(self.common_filenames + ".css", self.css_autocontent,"w")
-
-            elif not self.outcomes[0] and not self.outcomes[1]:
-                #This option does not autofill neither html nor css
-                pass
-                
-            else:
-                #If the user chooses an undefined choice (It it exists)
-                show_warning("Invalid Choice", "Your pattern of selections is not defined " \
-                             + "by this programme, try another one later.")
-                self.autofilled = False
+                    else: #Only autofill HTML without CSS and JS
+                        writelines_infile(self.common_filenames + ".html",
+                                          html_copy_content)
             
 
         except KeyError as auto_error:
@@ -356,7 +264,8 @@ class FileManager(object):
         """Destroy folder and files if some
         error happened while creating files or autofilling them."""
 
-        shutil.rmtree(self.complete_foldername)
+        if not self.files_created or not self.autofilled:
+            shutil.rmtree(self.complete_foldername)
             
         
 if __name__ == "__main__": 

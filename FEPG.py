@@ -1,46 +1,36 @@
-#                                 Automatic Front-End Project Generator
-
+#                     Automatic Front-End Project Generator
 
 #Created by JR016
 
 #YOU MUST NEITHER TAKE COPYRIGHT FROM THIS SOFTWARE NOR COMMERCIALIZE IT
 #THIS IS FREE OPEN-SOURCE SOFTWARE CREATED TO FACILITATE THE CREATION OF FRONT END PROJECTS
-#THE IMAGES USED IN THIS PROGRAMME COME FROM https://www.flaticon.com/ THE IMAGES ARE FREE OF COPYRIGHT
-#BUT IT IS MANDATORY TO SAY WHERE THEY COME FROM.
+
+#THIS SCRIPT CONTAINS THE CODE REQUIRED FOR THE "AFEPG" APP TO EXECUTE
 
 #I PLUBLISHED THE PROGRAMME WITH THE SOURCE CODE SO YOU CAN CHECK IT AND CREATE YOUR OWN VERSION WITH
 #NEW FEATURES AND STUFF
 #ENJOY IT AND HAVE FUN
 #:)
 
-
 #IMPORTS
-import os, enhancedTk, FileManager #Operating System programmes, the GUI window object and the FileManager
-from tkinter import * #To create the GUI
-from tkinter import ttk #To create enhanced versions of Tkinter widgets
-from tkinter import filedialog #To open up file dialogs
-from tkinter import font #To work with GUI's fonts 
+import os, enhancedTk, FileManager
+from tkinter import *
+from tkinter import ttk
+from tkinter import filedialog
+from tkinter import font
 from PIL import ImageTk, Image #To work with images
 
-
-
 #Global Constants
-APP_FONTS = ("Arial","Courier New","Times New Roman")#Fonts for the GUI
-
+APP_FONTS = ("Arial", "Lucida Grande","Courier New", "Georgia", "Times New Roman")#Fonts for the GUI
 PICS_FOLDERNAME = "images" #Name of the folder that contains the images of this programme
-
 ICON_PATH = os.path.join(PICS_FOLDERNAME, "project.png") #Path to the window icon
-
 PICS_PATH = (os.path.join(PICS_FOLDERNAME, "html.png"),
              os.path.join(PICS_FOLDERNAME, "css.png"),
-             os.path.join(PICS_FOLDERNAME, "js.jpg")) #Paths to programme's images
+             os.path.join(PICS_FOLDERNAME, "js.jpg")) #Path to programme's images
 
-#GUI Window Dimensions
-WIDTH = 650 
-HEIGHT = 550 
+WIDTH = 650
+HEIGHT = 550
 
-
-#Main function of the programme
 def main():
     """Run the programme."""
 
@@ -48,9 +38,10 @@ def main():
     window = enhancedTk.Super_Tk(title = "AFEPG",
                                  icon_path = ICON_PATH,
                                  width = WIDTH,
-                                 height = HEIGHT)
+                                 height = HEIGHT,
+                                 is_resizable = False)
 
-    #Initialize Main Frame and display it on superTk GUI Window Object
+    #Initialize Main Frame
     main_frame = ProjectGenerator(window,WIDTH,HEIGHT)
     main_frame.place(x = 0, y = 0)
 
@@ -87,8 +78,8 @@ class ProjectGenerator(Frame):
         self.title.place(x = 50, y = 60) #Place the widget on the GUI screen
 
         #Label to get Project Name
-        self.questionsFont = font.Font(family = APP_FONTS[1], size = 12) #Font for label questions
-        self.answersFont = font.Font(family = APP_FONTS[2], size = 12) #Font for user answers
+        self.questionsFont = font.Font(family = APP_FONTS[2], size = 12) #Font for label questions
+        self.answersFont = font.Font(family = APP_FONTS[4], size = 12) #Font for user answers
         self.project_name = ttk.Label(self,
                                       text = "Project Name:",
                                       font = self.questionsFont)
