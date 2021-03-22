@@ -17,12 +17,15 @@
 
 
 #IMPORTS
-
 import os, tkinter, shutil, copy
 from tkinter import messagebox
 
-#COMMONLY USED FUNCTIONS
+#GLOBAL CONSTANTS
+HTML_NAME = "index"
+CSS_NAME = "style"
+JS_NAME = "script"
 
+#COMMONLY USED FUNCTIONS
 def show_error(title, error_message):
     """Show a GUI error message."""
 
@@ -102,7 +105,9 @@ class FileManager(object):
         self.folder_name = folder_name
         self.folder_location = folder_path
         self.complete_foldername = os.path.join(self.folder_location, self.folder_name)
-        self.common_filenames = os.path.join(self.complete_foldername, self.folder_name)
+        self.complete_html_name = os.path.join(self.complete_foldername,HTML_NAME)
+        self.complete_css_name = os.path.join(self.complete_foldername,CSS_NAME)
+        self.complete_js_name = os.path.join(self.complete_foldername,JS_NAME)
         self.created_files = files_to_create
         self.autofilled_files = files_to_autofill
         self.js_position = js_position
@@ -150,13 +155,13 @@ class FileManager(object):
         try:
 
             if self.created_files["html"]:
-                open(self.common_filenames + ".html","x").close()
+                open(self.complete_html_name + ".html","x").close()
 
             if self.created_files["css"]:
-                open(self.common_filenames + ".css","x").close()
+                open(self.complete_css_name + ".css","x").close()
 
             if self.created_files["js"]:
-                open(self.common_filenames + ".js", "x").close()
+                open(self.complete_js_name + ".js", "x").close()
 
         except KeyError as not_in_dict:
             self.files_created = False
@@ -177,7 +182,7 @@ class FileManager(object):
            
             #Css is autofilled
             if self.autofilled_files["css"]:
-                writelines_infile(self.common_filenames + ".css",
+                writelines_infile(self.complete_css_name + ".css",
                                   FileManager.FILE_N_CONTENT["css"])
 
             #If Html is autofilled
@@ -211,7 +216,7 @@ class FileManager(object):
                             html_copy_content.insert(title_index + 2, references["js_reference"] + "\n")
 
                             #Autofill HTML file
-                            writelines_infile(self.common_filenames + ".html",
+                            writelines_infile(self.complete_html_name + ".html",
                                               html_copy_content)
 
                         else: #Include JS in body
@@ -220,12 +225,12 @@ class FileManager(object):
                             html_copy_content.insert(body_index + 2, references["js_reference"])
 
                             #Autofill HTML file
-                            writelines_infile(self.common_filenames + ".html",
+                            writelines_infile(self.complete_html_name + ".html",
                                               html_copy_content)
 
                     else: #Just write the CSS Reference in HTML File
 
-                            writelines_infile(self.common_filenames + ".html",
+                            writelines_infile(self.complete_html_name + ".html",
                                               html_copy_content)
 
                 else: #Autofill HTML but not CSS
@@ -236,18 +241,18 @@ class FileManager(object):
                             html_copy_content.insert(title_index + 1, references["js_reference"] + "\n")
 
                             #Autofill HTML file
-                            writelines_infile(self.common_filenames + ".html",
+                            writelines_infile(self.complete_html_name + ".html",
                                               html_copy_content)
 
                         else: #Include JS in body
                             html_copy_content.insert(body_index + 1, references["js_reference"])
 
                             #Autofill HTML file
-                            writelines_infile(self.common_filenames + ".html",
+                            writelines_infile(self.complete_html_name + ".html",
                                               html_copy_content)
 
                     else: #Only autofill HTML without CSS and JS
-                        writelines_infile(self.common_filenames + ".html",
+                        writelines_infile(self.complete_html_name + ".html",
                                           html_copy_content)
             
 
